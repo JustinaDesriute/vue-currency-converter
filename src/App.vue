@@ -16,21 +16,25 @@
     </v-toolbar>
 
     <v-content>
-      <HelloWorld/>
       <DatePicker/>
+      <AutocompleteInput/>
+      <AutocompleteInput/>
+      <InputValidation/>
     </v-content>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld'
 import DatePicker from './components/DatePicker'
+import AutocompleteInput from './components/AutocompleteInput'
+import InputValidation from './components/InputValidation'
 
 export default {
   name: 'App',
   components: {
+    AutocompleteInput,
     DatePicker,
-    HelloWorld
+    InputValidation,
   },
   data () {
     return {
