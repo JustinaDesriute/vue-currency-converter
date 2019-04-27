@@ -1,41 +1,37 @@
 <template>
-  <v-card>
-    <v-card-title class="headline font-weight-regular blue-grey white--text">Profile</v-card-title>
-    <v-card-text>
-      <v-subheader class="pa-0">Where do you live?</v-subheader>
-      <v-autocomplete
-        v-model="model"
-        :hint="!isEditing ? 'Click the icon to edit' : 'Click the icon to save'"
-        :items="states"
-        :readonly="!isEditing"
-        :label="`State — ${isEditing ? 'Editable' : 'Readonly'}`"
-        persistent-hint
-        prepend-icon="mdi-city"
-      >
-        <template v-slot:append-outer>
-          <v-slide-x-reverse-transition
-            mode="out-in"
-          >
-            <v-icon
-              :key="`icon-${isEditing}`"
-              :color="isEditing ? 'success' : 'info'"
-              @click="isEditing = !isEditing"
-              v-text="isEditing ? 'mdi-check-outline' : 'mdi-circle-edit-outline'"
-            ></v-icon>
-          </v-slide-x-reverse-transition>
-        </template>
-      </v-autocomplete>
-    </v-card-text>
+  <v-card class="currency-name-container">
+    <v-autocomplete
+      v-model="model"
+      :items="states"
+      :label="currency"
+      persistent-hint
+    >
+      <template v-slot:append-outer>
+        <v-slide-x-reverse-transition
+          mode="out-in"
+        >
+          <v-icon
+            :key="`icon-${isEditing}`"
+            :color="isEditing ? 'success' : 'info'"
+            @click="isEditing = !isEditing"
+            v-text="isEditing ? 'mdi-check-outline' : 'mdi-circle-edit-outline'"
+          ></v-icon>
+        </v-slide-x-reverse-transition>
+      </template>
+    </v-autocomplete>
   </v-card>
 </template>
+
+<style src="./autocomplete-field.css"></style>
 
 <script>
   export default {
     name: 'AutocompleteInput',
     data () {
       return {
-        isEditing: false,
+        isEditing: true,
         model: null,
+        // data here will be taken from the API
         states: [
           'Alabama', 'Alaska', 'American Samoa', 'Arizona',
           'Arkansas', 'California', 'Colorado', 'Connecticut',
@@ -53,6 +49,9 @@
           'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
         ]
       }
+    },
+    props: {
+      currency: String
     }
   }
 </script>

@@ -1,0 +1,12 @@
+.currency-lists-container {
+    background-color: orange;
+    text-align: center;
+    padding: 20px;
+    width: 100%;
+}
+
+.currency-list-item {
+    display: inline-block;
+    margin: 10px;
+    padding: 5px;
+}

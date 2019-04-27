@@ -19,9 +19,11 @@
     </v-toolbar>
 
     <v-content>
+      <div class="currency-lists-container">
+        <AutocompleteInput class="currency-list-item" currency="Convert From"/>
+        <AutocompleteInput class="currency-list-item" currency="Convert To"/>
+      </div>
       <DatePicker/>
-      <AutocompleteInput/>
-      <AutocompleteInput/>
       <InputValidation/>
       <ErrorHandler/>
     </v-content>
@@ -33,11 +35,13 @@
   </v-app>
 </template>
 
+<style src="./components/layout-styles.css"></style>
+
 <script>
-import DatePicker from './components/DatePicker'
 import AutocompleteInput from './components/AutocompleteInput'
-import InputValidation from './components/InputValidation'
+import DatePicker from './components/DatePicker'
 import ErrorHandler from './components/ErrorHandler'
+import InputValidation from './components/InputValidation'
 
 import axios from 'axios';
 
@@ -53,6 +57,9 @@ export default {
     return {
       //
     }
+  },
+  props: {
+    currency: String
   },
   mounted() {
     axios
