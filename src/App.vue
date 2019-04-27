@@ -5,6 +5,8 @@
         <span class="font-weight-light">currency converter</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
+      <span>The base currency: {{ base }} on {{ date }}</span>
+      <v-spacer></v-spacer>
       <v-tooltip bottom>
           <v-btn
             flat
@@ -12,7 +14,7 @@
             target="_blank"
             slot="activator"
           >
-            <span class="mr-2">built by: Justina Desriute</span>
+            <span>built by: Justina Desriute</span>
           </v-btn>
         go to LinkedIn profile
       </v-tooltip>
@@ -20,11 +22,17 @@
 
     <v-content>
       <div class="currency-lists-container">
-        <AutocompleteInput class="currency-list-item" currency="Convert From"/>
-        <AutocompleteInput class="currency-list-item" currency="Convert To"/>
+        <AmountInputField class="currency-list-item"/>
+        <AutocompleteInput class="currency-list-item" currency="Convert From" :countriesList="countries"/>
+        <AutocompleteInput class="currency-list-item" currency="Convert To" :countriesList="countries"/>
+        <v-text-field class="currency-list-item" 
+            placeholder="converted amount"
+            :value="convertedResult"
+            outline
+            readonly
+        ></v-text-field>
       </div>
       <DatePicker/>
-      <InputValidation/>
       <ErrorHandler/>
     </v-content>
 
@@ -41,7 +49,7 @@
 import AutocompleteInput from './components/AutocompleteInput'
 import DatePicker from './components/DatePicker'
 import ErrorHandler from './components/ErrorHandler'
-import InputValidation from './components/InputValidation'
+import AmountInputField from './components/AmountInputField'
 
 import axios from 'axios';
 
@@ -51,35 +59,35 @@ export default {
     AutocompleteInput,
     DatePicker,
     ErrorHandler,
-    InputValidation,
+    AmountInputField,
   },
   data () {
     return {
-      //
+      base: String,
+      date: String,
+      convertedResult: Number,
+      countries: Array,
     }
   },
   props: {
-    currency: String
+    currency: String,
   },
   mounted() {
-    axios
-      .get('https://api.coindesk.com/v1/bpi/currentprice.json')
-      .then(response => {
-        console.log('respone from api', response);
-      })
-      .catch(error => { // Executes if an error occurs if code is not >= 200 && < 300
-        this.showError = true;
-        this.error     = error;
-      }),
-
       axios
       .get('https://api.exchangeratesapi.io/2019-04-26')
       .then(response => {
-        console.log('respone from ANOTHER api', response);
+        console.log('full API response', response);
+        this.base =  response.data.base;
+        this.date =  response.data.date;
+        this.countries =  Object.keys(response.data.rates);
+        // 1 euro can buy that many moneys 
+        this.rates =  Object.values(response.data.rates);
+        this.convertedResult = 666;
+        console.log('countries:', this.countries);
+        console.log('convertion rate values:', this.rates);
       })
       .catch(error => { // Executes if an error occurs if code is not >= 200 && < 300
         this.showError = true;
-        this.error     = error;
       })
   },
 }

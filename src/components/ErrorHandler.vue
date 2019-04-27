@@ -1,16 +1,5 @@
 <template>
   <v-card>
-    <v-card-text>
-      <v-btn
-        block
-        color="primary"
-        dark
-        @click="snackbar = true"
-      >
-        CLick to show Snackbar
-      </v-btn>
-    </v-card-text>
-
     <v-snackbar
       v-model="snackbar"
       :bottom="y === 'bottom'"
@@ -38,7 +27,7 @@
     name: 'ErrorHandler',
     data () {
       return {
-        snackbar: false,
+        snackbar: true,
         y: 'top',
         x: null,
         mode: '',
