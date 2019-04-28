@@ -33,7 +33,7 @@
             readonly
         ></v-text-field>
       </div>
-      <DatePicker/>
+      <DatePicker v-on:calendarDateChanged="changeDateParameter"/>
       <ErrorHandler/>
     </v-content>
 
@@ -107,20 +107,40 @@ export default {
   },
 
   mounted() {
+      let today = new Date();
+      let day = today.getDate();
+      let month = today.getMonth() + 1; //January is 0!
+      let year = today.getFullYear();   
+      
+      if (day < 10) {
+        let day = '0' + day;
+      } 
+
+      if(month < 10) {
+        month = '0' + month;
+      } 
+    // if the calendar day != today --> set 'today' to the picked day
+
+    today = year + '-' + month + '-' + day ; 
+    console.log('today', today);
+
       axios
-      // check how to add the current date as a url parameter
-      .get('https://api.exchangeratesapi.io/2019-04-27')
-      .then(response => {
-        this.base = response.data.base;
-        this.date = response.data.date;
-        this.countryRatePair = response.data.rates;
-        this.countries = Object.keys(response.data.rates);
-        // 1 euro can buy that many moneys 
-        this.rates =  Object.values(response.data.rates);
-      })
-      .catch(error => { // Executes if an error occurs if code is not >= 200 && < 300
-        this.showError = true;
-      })
+        .get('https://api.exchangeratesapi.io/' + today)
+        .then(response => {
+          console.log('full API response', response);
+          this.countryRatePair = response.data.rates;
+          this.base =  response.data.base;
+          this.date =  response.data.date;
+          this.countries =  Object.keys(response.data.rates);
+          // 1 euro can buy that many moneys 
+          this.rates =  Object.values(response.data.rates);
+          this.convertedResult = 666;
+          console.log('countries:', this.countries);
+          console.log('convertion rate values:', this.rates);
+        })
+        .catch(error => { // Executes if an error occurs if code is not >= 200 && < 300
+          this.showError = true;
+        })
   },
 }
 </script>
