@@ -10,6 +10,7 @@
             type="number"
             label="Enter Amount"
             required
+            @keyup="setAmount"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -20,12 +21,20 @@
 <script>
   export default {
     name: 'AmountInputField',
+    
     data: () => ({
-      valid: false,
       amount: '0',
+      valid: false,
       amountRules: [
         v => !!v || 'Amount is required (integers only!)',
       ],
-    })
+    }),
+
+    methods: {
+      setAmount(value) {
+        // add a debounce
+        this.$emit('amountSet', value.srcElement.value);
+      }
+    }
   }
 </script>

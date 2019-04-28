@@ -22,9 +22,10 @@
 
     <v-content>
       <div class="currency-lists-container">
-        <AmountInputField class="currency-list-item"/>
-        <AutocompleteInput class="currency-list-item" currency="Convert From" :countriesList="countries"/>
-        <AutocompleteInput class="currency-list-item" currency="Convert To" :countriesList="countries"/>
+        <AmountInputField class="currency-list-item" v-on:amountSet="setEnteredAmount" />
+        <AutocompleteInput id="convertFrom" class="currency-list-item" v-on:currencySelected="setCurrencyRate" currency="Convert From" :countriesList="countries"/>
+        <AutocompleteInput id="convertTo" class="currency-list-item" v-on:currencySelected="setCurrencyRate" currency="Convert To" :countriesList="countries"/>
+        <v-btn class="currency-list-item" @click="convertCurrency">convert</v-btn>
         <v-text-field class="currency-list-item" 
             placeholder="converted amount"
             :value="convertedResult"
@@ -71,20 +72,51 @@ export default {
   },
   props: {
     currency: String,
+    enteredAmount: Number,
+    currencyRate: Number,
+    convertFromCurrencyRate: Number,
+    convertToCurrencyRate: Number,
   },
+
+  methods: {
+    setEnteredAmount(value) {
+      this.enteredAmount = value;
+      console.log('enteredAmount is:', this.enteredAmount);
+    },
+
+    setCurrencyRate(value, id) {
+
+      const currencyRate = Object.keys(this.countryRatePair)
+        .filter(key => key == value)    
+        .reduce((obj, key) => {
+          obj[key] = this.countryRatePair[key];
+          return parseFloat(Object.values(obj));
+        }, {});
+
+      if (id == 'convertFrom') {
+        this.convertFromCurrencyRate = currencyRate;
+      } else {
+        this.convertToCurrencyRate = currencyRate;
+      }
+    },
+
+    convertCurrency() {
+      console.log('CONVERTING', this.enteredAmount, this.convertFromCurrencyRate, this.convertToCurrencyRate);  
+      this.convertedResult = (parseInt(this.enteredAmount) * parseInt(this.convertFromCurrencyRate)) * parseInt(this.convertToCurrencyRate);
+    }
+  },
+
   mounted() {
       axios
-      .get('https://api.exchangeratesapi.io/2019-04-26')
+      // check how to add the current date as a url parameter
+      .get('https://api.exchangeratesapi.io/2019-04-27')
       .then(response => {
-        console.log('full API response', response);
-        this.base =  response.data.base;
-        this.date =  response.data.date;
-        this.countries =  Object.keys(response.data.rates);
+        this.base = response.data.base;
+        this.date = response.data.date;
+        this.countryRatePair = response.data.rates;
+        this.countries = Object.keys(response.data.rates);
         // 1 euro can buy that many moneys 
         this.rates =  Object.values(response.data.rates);
-        this.convertedResult = 666;
-        console.log('countries:', this.countries);
-        console.log('convertion rate values:', this.rates);
       })
       .catch(error => { // Executes if an error occurs if code is not >= 200 && < 300
         this.showError = true;

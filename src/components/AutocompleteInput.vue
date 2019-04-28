@@ -4,6 +4,7 @@
       v-model="model"
       :items="countriesList"
       :label="currency"
+      @change="currencySelected"
       persistent-hint
     >
       <template v-slot:append-outer>
@@ -14,8 +15,7 @@
             :key="`icon-${isEditing}`"
             :color="isEditing ? 'success' : 'info'"
             @click="isEditing = !isEditing"
-            v-text="isEditing ? 'mdi-check-outline' : 'mdi-circle-edit-outline'"
-          ></v-icon>x
+          ></v-icon>
         </v-slide-x-reverse-transition>
       </template>
     </v-autocomplete>
@@ -39,5 +39,12 @@ import axios from 'axios';
       currency: String,
       countriesList: Array,
     },
+    methods: {
+      currencySelected(value) {
+        // add a debounce
+        const id = this.$el.id;
+        this.$emit('currencySelected', value, id);
+      }
+    }
   }
 </script>
