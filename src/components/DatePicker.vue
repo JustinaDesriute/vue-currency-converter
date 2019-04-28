@@ -8,7 +8,7 @@
             <v-checkbox v-model="reactive" hide-details label="Reactive"></v-checkbox>
         </v-flex>
     </v-layout> -->
-    <v-date-picker full-width v-model="picker" :landscape="landscape" :reactive="reactive"></v-date-picker>
+    <v-date-picker @input="datePicked" full-width v-model="picker" :landscape="landscape" :reactive="reactive"></v-date-picker>
   </div>
 </template>
 
@@ -25,6 +25,13 @@
           landscape: true,
           reactive: false
         }
+      },
+
+    methods: {
+      datePicked(value) {
+        console.log('does the dat come from this.picker?', value);
+        this.$emit('calendarDateChanged', value)
       }
+    }
   }
 </script>
