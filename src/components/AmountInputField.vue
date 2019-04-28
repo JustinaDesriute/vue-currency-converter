@@ -33,7 +33,6 @@
 
     methods: {
       setAmount(value) {
-        // add a debounce
         this.$emit('amountSet', value.srcElement.value);
       }
     }

@@ -42,7 +42,6 @@ import axios from 'axios';
     },
     methods: {
       currencySelected(value) {
-        // add a debounce
         const id = this.$el.id;
         this.$emit('currencySelected', value, id);
       }

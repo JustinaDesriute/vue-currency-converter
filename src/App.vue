@@ -120,8 +120,8 @@ export default {
         let month = requestedDay.getMonth() + 1;
         let year = requestedDay.getFullYear();   
         
-        if (day < 10) { let day = '0' + day; }; 
-        if(month < 10) { month = '0' + month; };
+        if (day < 10) { let day = '0' + day; } 
+        if(month < 10) { month = '0' + month; }
 
         this.requestedDay = year + '-' + month + '-' + day; 
       }
