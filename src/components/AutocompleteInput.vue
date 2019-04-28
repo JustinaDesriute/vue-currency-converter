@@ -1,6 +1,7 @@
 <template>
-  <v-card class="currency-name-container">
+  <v-card class="currency-name-container" color="rgba(241, 66, 63, 0.7)">
     <v-autocomplete
+      color="#8c8c8c"
       v-model="model"
       :items="countriesList"
       :label="currency"

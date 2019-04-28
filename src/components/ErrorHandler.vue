@@ -27,12 +27,22 @@
     name: 'ErrorHandler',
     data () {
       return {
-        snackbar: true,
+        snackbar: false,
         y: 'top',
         x: null,
         mode: '',
         timeout: 6000,
         text: 'Sorry, data did not come through :('
+      }
+    },
+    props: {
+      showError: Boolean
+    },
+    watch: {
+      showError: function(show) {
+        if (show) {
+          this.snackbar = true;
+        }
       }
     }
   }

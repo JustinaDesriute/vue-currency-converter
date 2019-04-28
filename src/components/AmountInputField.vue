@@ -5,6 +5,7 @@
         <v-flex
         >
           <v-text-field
+            color="#8c8c8c"
             v-model="amount"
             :rules="amountRules"
             type="number"

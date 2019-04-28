@@ -1,7 +1,24 @@
+a:link {
+  color: rgb(241, 66, 63);
+}
+
+a:visited {
+  color: rgba(241, 66, 63, 0.9);
+}
+
+a:hover {
+  color: rgba(241, 66, 63, 0.9);
+}
+
+a:active {
+  color: rgba(241, 66, 63, 0.9);
+}
+
 .currency-lists-container {
     background-color: orange;
-    text-align: center;
+    height: 100%;
     padding: 20px;
+    text-align: center;
     width: 100%;
 }
 
@@ -10,4 +27,8 @@
     display: inline-block;
     margin: 10px;
     padding: 5px;
+}
+
+.text-color {
+    color: rgb(241, 66, 63);
 }
