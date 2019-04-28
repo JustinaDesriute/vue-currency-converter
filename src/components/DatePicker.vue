@@ -29,7 +29,6 @@
 
     methods: {
       datePicked(value) {
-        console.log('does the dat come from this.picker?', value);
         this.$emit('calendarDateChanged', value)
       }
     }

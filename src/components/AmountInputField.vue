@@ -23,7 +23,7 @@
     name: 'AmountInputField',
     
     data: () => ({
-      amount: '0',
+      amount: '',
       valid: false,
       amountRules: [
         v => !!v || 'Amount is required (integers only!)',
