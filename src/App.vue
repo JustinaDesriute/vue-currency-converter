@@ -5,7 +5,7 @@
         <span class="font-weight-light">currency converter</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <span>The base currency: <span class="text-color">{{ base }}</span> on <span class="text-color">{{ date }}</span></span>
+      <span>Exchange rates updated on: <span class="text-color">{{ lastUpdateDate }}</span> by the European Central Bank</span>
       <v-spacer></v-spacer>
       <v-tooltip bottom>
           <v-btn
@@ -23,16 +23,19 @@
     <v-content>
       <div class="currency-lists-container">
         <DatePicker v-on:calendarDateChanged="changeDateParameter"/>
-        <AutocompleteInput id="convertFrom" class="currency-list-item" v-on:currencySelected="setCurrencyRate" currency="Convert From" :countriesList="countries"/>
-        <AutocompleteInput id="convertTo" class="currency-list-item" v-on:currencySelected="setCurrencyRate" currency="Convert To" :countriesList="countries"/>
-        <AmountInputField class="currency-list-item" v-on:amountSet="setEnteredAmount" />
-        <v-btn class="currency-list-item" @click="convertCurrency">convert</v-btn>
+        <AmountInputField id="amountInputField" class="currency-list-item" v-on:amountSet="setEnteredAmount" />
+        <AutocompleteInput id="convertFrom" class="currency-list-item" v-on:currencySelected="setCurrencyRate" currency="Convert From" :countriesList="countries" :currencyName="baseCurrency"/>
+        <!--TODO: change the button to "swap"-->  
+        <v-btn class="currency-list-item" @click="convertCurrency">swap!</v-btn>
+        <AutocompleteInput id="convertTo" class="currency-list-item" v-on:currencySelected="setCurrencyRate" currency="Convert To" :countriesList="countries" :currencyName="convertToCurrencyName"/>
         <v-text-field class="currency-list-item"
             color="#8c8c8c" 
             placeholder="converted amount"
             :value="convertedResult"
             readonly
         ></v-text-field>
+        <!-- TODO: display the text fields only after conversion has been made-->
+        <CurrencyRatioDisplay :fromEqualsTo="fromRatioTo" :toEqualsFrom="toRatioFrom"/>
       </div>
       <ErrorHandler :showError="showSnackbar"/>
     </v-content>
@@ -51,6 +54,7 @@ import AutocompleteInput from './components/AutocompleteInput'
 import DatePicker from './components/DatePicker'
 import ErrorHandler from './components/ErrorHandler'
 import AmountInputField from './components/AmountInputField'
+import CurrencyRatioDisplay from './components/CurrencyRatioDisplay'
 
 import axios from 'axios';
 
@@ -59,21 +63,25 @@ export default {
   components: {
     AutocompleteInput,
     DatePicker,
+    CurrencyRatioDisplay,
     ErrorHandler,
     AmountInputField,
   },
   data () {
     return {
-      base: String,
-      date: String,
-      convertedResult: Number,
+      baseCurrency: 'GBP',
+      convertToCurrencyName: 'USD',
+      lastUpdateDate: String,
+      convertedResult: '',
       countries: Array,
-      requestedDay: 'initial value',
+      currency: String,
+      requestedDay: 'latest',
       showSnackbar: false,
     }
   },
   props: {
-    currency: String,
+    fromRatioTo: String,
+    toRatioFrom: String,
     enteredAmount: Number,
     currencyRate: Number,
     convertFromCurrencyRate: Number,
@@ -83,6 +91,9 @@ export default {
 
   methods: {
     setEnteredAmount(value) {
+      if (this.enteredAmount == undefined) {
+        this.enteredAmount == 100;
+      }
       this.enteredAmount = value;
     },
 
@@ -95,14 +106,31 @@ export default {
         }, {});
 
       if (id == 'convertFrom') {
+        this.baseCurrency = value;
         this.convertFromCurrencyRate = currencyRate;
+        this.callExchangeRatesApi();
       } else {
+        if (value) {
+          this.convertToCurrencyName = value;
+        } else {
+          this.convertToCurrencyName = 'USD';
+        }
         this.convertToCurrencyRate = currencyRate;
       }
     },
 
     convertCurrency() {
-      this.convertedResult = ((parseFloat(this.enteredAmount) / parseFloat(this.convertFromCurrencyRate)) * parseFloat(this.convertToCurrencyRate)).toFixed(2);
+      if (typeof(this.convertToCurrencyRate) == 'object') {
+        this.convertToCurrencyRate = 1.3006678416;
+      }
+      if (typeof(this.enteredAmount) == 'undefined') {
+        console.log('entered amount UNDEFINED');
+        this.enteredAmount = 100;
+      }
+      console.log('convertCurrency', this.enteredAmount, this.convertToCurrencyRate, 'convertToCurrencyName', this.convertToCurrencyName);
+      this.fromRatioTo = '1' + this.convertToCurrencyName + ' = ' + ' ... ' + this.baseCurrency;
+      this.toRatioFrom = '1' + this.baseCurrency + ' = ' + this.convertToCurrencyRate.toFixed(4) + ' ' + this.convertToCurrencyName;
+      this.convertedResult = (parseFloat(this.enteredAmount) * parseFloat(this.convertToCurrencyRate)).toFixed(3);
     },
 
     changeDateParameter(value) {
@@ -112,32 +140,24 @@ export default {
     },
 
     setDateParameter() {
-      if (this.newRequestedValue == this.requestedDay) { 
-        return 
-      } else if (this.requestedDay == 'initial value') {
-        let requestedDay = new Date();
-        let day = requestedDay.getDate();
-        let month = requestedDay.getMonth() + 1;
-        let year = requestedDay.getFullYear();   
-        
-        if (day < 10) { let day = '0' + day; } 
-        if(month < 10) { month = '0' + month; }
-
-        this.requestedDay = year + '-' + month + '-' + day; 
-      }
-      else {this.requestedDay = this.newRequestedValue}
+      if ((this.requestedDay == 'latest') && (this.newRequestedValue == undefined)) {
+        return;
+      } 
+        this.requestedDay = this.newRequestedValue;
     },
 
     callExchangeRatesApi() {
       axios
-        .get('https://api.exchangeratesapi.io/' + this.requestedDay)
+        .get('https://api.exchangeratesapi.io/' + this.requestedDay + '?base=' + this.baseCurrency)
         .then(response => {
+          console.log('response from the API', response);
+          this.setEnteredAmount();
           this.countryRatePair = response.data.rates;
-          this.base =  response.data.base;
-          this.date =  response.data.date;
+          this.lastUpdateDate =  response.data.date;
           this.countries =  Object.keys(response.data.rates);
           this.rates =  Object.values(response.data.rates);
-          this.convertedResult = '';
+          this.setCurrencyRate();
+          this.convertCurrency();
         })
         .catch(error => {
           this.showSnackbar = true;

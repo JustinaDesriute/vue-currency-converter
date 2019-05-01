@@ -2,7 +2,7 @@
   <v-card class="currency-name-container" color="rgba(241, 66, 63, 0.7)">
     <v-autocomplete
       color="#8c8c8c"
-      v-model="model"
+      v-model="currencyName"
       :items="countriesList"
       :label="currency"
       @change="currencySelected"
@@ -33,12 +33,12 @@ import axios from 'axios';
     data () {
       return {
         isEditing: true,
-        model: null,
       }
     },
     props: {
       currency: String,
       countriesList: Array,
+      currencyName: String,
     },
     methods: {
       currencySelected(value) {
