@@ -25,8 +25,7 @@
         <DatePicker v-on:calendarDateChanged="changeDateParameter"/>
         <AmountInputField id="amountInputField" class="currency-list-item" v-on:amountSet="setEnteredAmount" />
         <AutocompleteInput id="convertFrom" class="currency-list-item" v-on:currencySelected="setCurrencyRate" currency="Convert From" :countriesList="countries" :currencyName="baseCurrency"/>
-        <!--TODO: change the button to "swap"-->  
-        <v-btn class="currency-list-item" @click="convertCurrency">swap!</v-btn>
+        <v-btn class="currency-list-item" @click="swapCurrencies">swap!</v-btn>
         <AutocompleteInput id="convertTo" class="currency-list-item" v-on:currencySelected="setCurrencyRate" currency="Convert To" :countriesList="countries" :currencyName="convertToCurrencyName"/>
         <v-text-field class="currency-list-item"
             color="#8c8c8c" 
@@ -71,7 +70,7 @@ export default {
     return {
       baseCurrency: 'GBP',
       convertToCurrencyName: 'USD',
-      lastUpdateDate: String,
+      lastUpdateDate: '...',
       convertedResult: '',
       countries: Array,
       currency: String,
@@ -84,50 +83,61 @@ export default {
     toRatioFrom: String,
     enteredAmount: Number,
     currencyRate: Number,
-    convertFromCurrencyRate: Number,
+    currencyRateFormula: Number,
     convertToCurrencyRate: Number,
     newRequestedValue: String,
   },
 
   methods: {
     setEnteredAmount(value) {
-      if (this.enteredAmount == undefined) {
-        this.enteredAmount == 100;
+      if (value == undefined) {
+        value = 100;
       }
       this.enteredAmount = value;
+      this.convertCurrency();
+    },
+
+    swapCurrencies() {
+      let valuePlaceholder = this.baseCurrency;
+      this.baseCurrency = this.convertToCurrencyName;
+      this.convertToCurrencyName = valuePlaceholder;
+      this.setCurrencyRate(this.baseCurrency, 'convertFrom');
+      this.convertCurrency();
     },
 
     setCurrencyRate(value, id) {
+      console.log('value AND id', value, id);
       const currencyRate = Object.keys(this.countryRatePair)
-        .filter(key => key == value)    
-        .reduce((obj, key) => {
-          obj[key] = this.countryRatePair[key];
-          return parseFloat(Object.values(obj));
-        }, {});
+          .filter(key => key == value)    
+          .reduce((obj, key) => {
+            obj[key] = this.countryRatePair[key];
+            return parseFloat(Object.values(obj));
+          }, {});
 
-      if (id == 'convertFrom') {
-        this.baseCurrency = value;
-        this.convertFromCurrencyRate = currencyRate;
-        this.callExchangeRatesApi();
-      } else {
-        if (value) {
-          this.convertToCurrencyName = value;
+        if (id == 'convertFrom') {
+          this.baseCurrency = value;
+          this.callExchangeRatesApi();
         } else {
-          this.convertToCurrencyName = 'USD';
+          if (value && id != undefined) {
+            this.convertToCurrencyName = value;
+          } else {
+
+          }
+          this.convertToCurrencyRate = currencyRate;
         }
-        this.convertToCurrencyRate = currencyRate;
-      }
+        this.convertCurrency();
     },
 
     convertCurrency() {
-      if (typeof(this.convertToCurrencyRate) == 'object') {
+      // type check needed for initial conversion
+      if (typeof(this.convertToCurrencyRate) == 'object' || this.convertToCurrencyRate == undefined) {
         this.convertToCurrencyRate = 1.3006678416;
       }
       if (typeof(this.enteredAmount) == 'undefined') {
-        console.log('entered amount UNDEFINED');
         this.enteredAmount = 100;
       }
       console.log('convertCurrency', this.enteredAmount, this.convertToCurrencyRate, 'convertToCurrencyName', this.convertToCurrencyName);
+
       this.fromRatioTo = '1' + this.convertToCurrencyName + ' = ' + ' ... ' + this.baseCurrency;
       this.toRatioFrom = '1' + this.baseCurrency + ' = ' + this.convertToCurrencyRate.toFixed(4) + ' ' + this.convertToCurrencyName;
       this.convertedResult = (parseFloat(this.enteredAmount) * parseFloat(this.convertToCurrencyRate)).toFixed(3);
@@ -156,10 +166,12 @@ export default {
           this.lastUpdateDate =  response.data.date;
           this.countries =  Object.keys(response.data.rates);
           this.rates =  Object.values(response.data.rates);
+          console.log(' AXIOS: this.baseCurrency', this.baseCurrency, 'this.countryRatePair', this.countryRatePair);
           this.setCurrencyRate();
           this.convertCurrency();
         })
         .catch(error => {
+          console.log('error', error);
           this.showSnackbar = true;
         })
     }

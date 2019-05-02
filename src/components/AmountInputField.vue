@@ -9,8 +9,11 @@
             v-model="amount"
             :rules="amountRules"
             type="number"
+            min="1"
             label="Enter Amount"
             required
+            value="123"
+            onkeypress="return event.charCode >= 48"
             @keyup="setAmount"
           ></v-text-field>
         </v-flex>
@@ -25,7 +28,7 @@
     
     data: () => ({
       amount: 100,
-      valid: false,
+      valid: true,
       amountRules: [
         v => !!v || 'Amount is required (integers only!)',
       ],
