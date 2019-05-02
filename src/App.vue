@@ -76,6 +76,7 @@ export default {
       currency: String,
       requestedDay: 'latest',
       showSnackbar: false,
+      initialLoad: true,
     }
   },
   props: {
@@ -83,7 +84,7 @@ export default {
     toRatioFrom: String,
     enteredAmount: Number,
     currencyRate: Number,
-    currencyRateFormula: Number,
+    calculatedRate: Number,
     convertToCurrencyRate: Number,
     newRequestedValue: String,
   },
@@ -105,37 +106,41 @@ export default {
       this.convertCurrency();
     },
 
-    setCurrencyRate(value, id) {
-      console.log('GOT the value and id', value, id)
-      const currencyRate = Object.keys(this.countryRatePair)
+    calculateRate(value) {
+      let currencyRate = Object.keys(this.countryRatePair)
         .filter(key => key == value)    
         .reduce((obj, key) => {
           obj[key] = this.countryRatePair[key];
           return parseFloat(Object.values(obj));
         }, {});
 
+        this.calculatedRate = currencyRate;
+    },
+
+    setCurrencyRate(value, id) {
+      if (this.initialLoad == true) { return };
+
+      this.calculateRate(value);      
+
+      if (id == ' ') {
+        this.calculateRate('USD');
+        this.convertToCurrencyRate = this.calculatedRate;
+      }
       if (id == 'convertTo') {
-        console.log('id', id);
+        this.convertToCurrencyName = value;
+        this.calculateRate(value);
+        this.convertToCurrencyRate = this.calculatedRate;
       }
       if (id == 'convertFrom') {
-        // console.log('IDIDIDIDIDIDI: setCurrencyRate, value:', value);
         this.baseCurrency = value;
         this.callExchangeRatesApi();
-      } else {
-        if (value && id != undefined) {
-          this.convertToCurrencyName = value;
-        } else {
-          // console.log('currency-rate-pair', this.countryRatePair);
-        }
-        console.log('currencyRate', currencyRate);
-        this.convertToCurrencyRate = currencyRate;
-      }
+      } 
+      
       this.convertCurrency();
     },
 
     convertCurrency() {
       // type check needed for initial conversion
-      console.log('this.convertToCurrencyRate', this.convertToCurrencyRate);
       if (typeof(this.convertToCurrencyRate) == 'object' || this.convertToCurrencyRate == undefined) {
         this.convertToCurrencyRate = 1.3006678416;
       }
@@ -167,14 +172,15 @@ export default {
       axios
         .get('https://api.exchangeratesapi.io/' + this.requestedDay + '?base=' + this.baseCurrency)
         .then(response => {
-          console.log('response from the API', response);
           this.setEnteredAmount();
           this.countryRatePair = response.data.rates;
           this.lastUpdateDate =  response.data.date;
           this.countries =  Object.keys(response.data.rates);
           this.rates =  Object.values(response.data.rates);
+          console.log('response from the API', response);
           console.log(' AXIOS: this.baseCurrency', this.baseCurrency, 'this.countryRatePair', this.countryRatePair);
-          this.setCurrencyRate();
+          this.setCurrencyRate(this.baseCurrency, ' ');
+          this.initialLoad = false;
           this.convertCurrency();
         })
         .catch(error => {
