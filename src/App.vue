@@ -33,7 +33,6 @@
             :value="convertedResult"
             readonly
         ></v-text-field>
-        <!-- TODO: display the text fields only after conversion has been made-->
         <CurrencyRatioDisplay :fromEqualsTo="fromRatioTo" :toEqualsFrom="toRatioFrom"/>
       </div>
       <ErrorHandler :showError="showSnackbar"/>
@@ -91,8 +90,10 @@ export default {
 
   methods: {
     setEnteredAmount(value) {
-      if (value == undefined) {
+      if (value == undefined && this.initialLoad == true) {
         value = 100;
+      } else if (value == undefined && this.enteredAmount != undefined) {
+        value = this.enteredAmount;
       }
       this.enteredAmount = value;
       this.convertCurrency();
@@ -102,8 +103,7 @@ export default {
       let valuePlaceholder = this.baseCurrency;
       this.baseCurrency = this.convertToCurrencyName;
       this.convertToCurrencyName = valuePlaceholder;
-      this.setCurrencyRate(this.baseCurrency, 'convertFrom');
-      this.convertCurrency();
+      this.setCurrencyRate(this.baseCurrency, 'swap');
     },
 
     calculateRate(value) {
@@ -119,23 +119,22 @@ export default {
 
     setCurrencyRate(value, id) {
       if (this.initialLoad == true) { return };
-
       this.calculateRate(value);      
 
       if (id == ' ') {
-        this.calculateRate('USD');
+        this.calculateRate(this.convertToCurrencyName);
         this.convertToCurrencyRate = this.calculatedRate;
-      }
-      if (id == 'convertTo') {
-        this.convertToCurrencyName = value;
-        this.calculateRate(value);
-        this.convertToCurrencyRate = this.calculatedRate;
-      }
-      if (id == 'convertFrom') {
-        this.baseCurrency = value;
-        this.callExchangeRatesApi();
+      } else if (id == 'swap') {
+          this.baseCurrency = value;
+          this.callExchangeRatesApi();
+      } else if (id == 'convertTo') {
+          this.convertToCurrencyName = value;
+          this.calculateRate(value);
+          this.convertToCurrencyRate = this.calculatedRate;
+      } else if (id == 'convertFrom') {
+          this.baseCurrency = value;
+          this.callExchangeRatesApi();
       } 
-      
       this.convertCurrency();
     },
 
@@ -148,7 +147,6 @@ export default {
         this.enteredAmount = 100;
       }
       console.log('convertCurrency', this.enteredAmount, this.convertToCurrencyRate, 'convertToCurrencyName', this.convertToCurrencyName);
-
       this.fromRatioTo = '1' + this.convertToCurrencyName + ' = ' + ' ... ' + this.baseCurrency;
       this.toRatioFrom = '1' + this.baseCurrency + ' = ' + this.convertToCurrencyRate.toFixed(4) + ' ' + this.convertToCurrencyName;
       
@@ -177,11 +175,8 @@ export default {
           this.lastUpdateDate =  response.data.date;
           this.countries =  Object.keys(response.data.rates);
           this.rates =  Object.values(response.data.rates);
-          console.log('response from the API', response);
-          console.log(' AXIOS: this.baseCurrency', this.baseCurrency, 'this.countryRatePair', this.countryRatePair);
           this.setCurrencyRate(this.baseCurrency, ' ');
           this.initialLoad = false;
-          this.convertCurrency();
         })
         .catch(error => {
           console.log('error', error);
