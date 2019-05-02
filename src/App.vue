@@ -25,7 +25,7 @@
         <DatePicker v-on:calendarDateChanged="changeDateParameter"/>
         <AmountInputField id="amountInputField" class="currency-list-item" v-on:amountSet="setEnteredAmount" />
         <AutocompleteInput id="convertFrom" class="currency-list-item" v-on:currencySelected="setCurrencyRate(...arguments)" currency="Convert From" :countriesList="countries" :currencyName="baseCurrency"/>
-        <v-btn class="currency-list-item" @click="swapCurrencies">swap!</v-btn>
+        <v-btn color="red" class="currency-list-item" @click="swapCurrencies">&#8633;</v-btn>
         <AutocompleteInput id="convertTo" class="currency-list-item" v-on:currencySelected="setCurrencyRate(...arguments)" currency="Convert To" :countriesList="countries" :currencyName="convertToCurrencyName"/>
         <v-text-field class="currency-list-item"
             color="#8c8c8c" 
