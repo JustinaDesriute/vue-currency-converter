@@ -24,9 +24,9 @@
       <div class="currency-lists-container">
         <DatePicker v-on:calendarDateChanged="changeDateParameter"/>
         <AmountInputField id="amountInputField" class="currency-list-item" v-on:amountSet="setEnteredAmount" />
-        <AutocompleteInput id="convertFrom" class="currency-list-item" v-on:currencySelected="setCurrencyRate" currency="Convert From" :countriesList="countries" :currencyName="baseCurrency"/>
+        <AutocompleteInput id="convertFrom" class="currency-list-item" v-on:currencySelected="setCurrencyRate(...arguments)" currency="Convert From" :countriesList="countries" :currencyName="baseCurrency"/>
         <v-btn class="currency-list-item" @click="swapCurrencies">swap!</v-btn>
-        <AutocompleteInput id="convertTo" class="currency-list-item" v-on:currencySelected="setCurrencyRate" currency="Convert To" :countriesList="countries" :currencyName="convertToCurrencyName"/>
+        <AutocompleteInput id="convertTo" class="currency-list-item" v-on:currencySelected="setCurrencyRate(...arguments)" currency="Convert To" :countriesList="countries" :currencyName="convertToCurrencyName"/>
         <v-text-field class="currency-list-item"
             color="#8c8c8c" 
             placeholder="converted amount"
@@ -106,30 +106,36 @@ export default {
     },
 
     setCurrencyRate(value, id) {
-      console.log('value AND id', value, id);
+      console.log('GOT the value and id', value, id)
       const currencyRate = Object.keys(this.countryRatePair)
-          .filter(key => key == value)    
-          .reduce((obj, key) => {
-            obj[key] = this.countryRatePair[key];
-            return parseFloat(Object.values(obj));
-          }, {});
+        .filter(key => key == value)    
+        .reduce((obj, key) => {
+          obj[key] = this.countryRatePair[key];
+          return parseFloat(Object.values(obj));
+        }, {});
 
-        if (id == 'convertFrom') {
-          this.baseCurrency = value;
-          this.callExchangeRatesApi();
+      if (id == 'convertTo') {
+        console.log('id', id);
+      }
+      if (id == 'convertFrom') {
+        // console.log('IDIDIDIDIDIDI: setCurrencyRate, value:', value);
+        this.baseCurrency = value;
+        this.callExchangeRatesApi();
+      } else {
+        if (value && id != undefined) {
+          this.convertToCurrencyName = value;
         } else {
-          if (value && id != undefined) {
-            this.convertToCurrencyName = value;
-          } else {
-
-          }
-          this.convertToCurrencyRate = currencyRate;
+          // console.log('currency-rate-pair', this.countryRatePair);
         }
-        this.convertCurrency();
+        console.log('currencyRate', currencyRate);
+        this.convertToCurrencyRate = currencyRate;
+      }
+      this.convertCurrency();
     },
 
     convertCurrency() {
       // type check needed for initial conversion
+      console.log('this.convertToCurrencyRate', this.convertToCurrencyRate);
       if (typeof(this.convertToCurrencyRate) == 'object' || this.convertToCurrencyRate == undefined) {
         this.convertToCurrencyRate = 1.3006678416;
       }
@@ -140,6 +146,7 @@ export default {
 
       this.fromRatioTo = '1' + this.convertToCurrencyName + ' = ' + ' ... ' + this.baseCurrency;
       this.toRatioFrom = '1' + this.baseCurrency + ' = ' + this.convertToCurrencyRate.toFixed(4) + ' ' + this.convertToCurrencyName;
+      
       this.convertedResult = (parseFloat(this.enteredAmount) * parseFloat(this.convertToCurrencyRate)).toFixed(3);
     },
 

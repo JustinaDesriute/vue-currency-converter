@@ -42,8 +42,8 @@ import axios from 'axios';
     },
     methods: {
       currencySelected(value) {
-        console.log('curency SELECTED', value);
         const id = this.$el.id;
+        console.log('curency SELECTED: value and id', value, id);
         this.$emit('currencySelected', value, id);
       }
     }
