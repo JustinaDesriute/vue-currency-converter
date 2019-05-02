@@ -2,12 +2,12 @@
     <v-flex>
         <v-text-field class="currency-list-item"
             color="#8c8c8c" 
-            :value="fromEqualsTo"
+            :value="toEqualsFrom"
             readonly
         ></v-text-field>
         <v-text-field class="currency-list-item"
             color="#8c8c8c" 
-            :value="toEqualsFrom"
+            :value="fromEqualsTo"
             readonly
         ></v-text-field>
     </v-flex>

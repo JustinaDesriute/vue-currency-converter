@@ -40,7 +40,7 @@
 
     <v-footer class="pa-3">
       <v-spacer></v-spacer>
-      <div>&copy; {{ new Date().getFullYear() }} check out my <a href="https://github.com/JustinaDesriute/" target="_blank">GitHub</a> profile and contact me on <a href="https://www.linkedin.com/in/justina-de%C5%A1ri%C5%ABt%C4%97-966153101/" target="_blank">LinkedIn</a> </div>
+      <div>&copy; {{ new Date().getFullYear() }} check out my <a href="https://github.com/JustinaDesriute/" target="_blank">GitHub profile</a> and contact me on <a href="https://www.linkedin.com/in/justina-de%C5%A1ri%C5%ABt%C4%97-966153101/" target="_blank">LinkedIn</a> </div>
     </v-footer>
   </v-app>
 </template>
@@ -85,6 +85,7 @@ export default {
     currencyRate: Number,
     calculatedRate: Number,
     convertToCurrencyRate: Number,
+    swappedConversionRate: Number,
     newRequestedValue: String,
   },
 
@@ -146,11 +147,36 @@ export default {
       if (typeof(this.enteredAmount) == 'undefined') {
         this.enteredAmount = 100;
       }
-      console.log('convertCurrency', this.enteredAmount, this.convertToCurrencyRate, 'convertToCurrencyName', this.convertToCurrencyName);
-      this.fromRatioTo = '1' + this.convertToCurrencyName + ' = ' + ' ... ' + this.baseCurrency;
+
+      this.setComparisonFieldValues(this.convertToCurrencyName);
+      this.convertedResult = (parseFloat(this.enteredAmount) * parseFloat(this.convertToCurrencyRate)).toFixed(2);
+    },
+
+    swapConversionRates(value) {
+      axios
+        .get('https://api.exchangeratesapi.io/' + this.requestedDay + '?base=' + this.baseCurrency)
+        .then(response => {
+          this.pair = response.data.rates;
+
+          let swappedCurrencyRate = Object.keys(this.pair)
+            .filter(key => key == value)    
+            .reduce((obj, key) => {
+              obj[key] = this.pair[key];
+              return parseFloat(Object.values(obj));
+            }, {});
+
+            this.swappedConversionRate = swappedCurrencyRate;
+            this.fromRatioTo = '1' + this.convertToCurrencyName + ' = ' + this.swappedConversionRate.toFixed(4) + ' ' + this.baseCurrency;
+        })
+        .catch(error => {
+          console.log('error', error);
+          this.showSnackbar = true;
+        })
+    },
+
+    setComparisonFieldValues(value) {
+      this.swapConversionRates(value);
       this.toRatioFrom = '1' + this.baseCurrency + ' = ' + this.convertToCurrencyRate.toFixed(4) + ' ' + this.convertToCurrencyName;
-      
-      this.convertedResult = (parseFloat(this.enteredAmount) * parseFloat(this.convertToCurrencyRate)).toFixed(3);
     },
 
     changeDateParameter(value) {
@@ -174,7 +200,6 @@ export default {
           this.countryRatePair = response.data.rates;
           this.lastUpdateDate =  response.data.date;
           this.countries =  Object.keys(response.data.rates);
-          this.rates =  Object.values(response.data.rates);
           this.setCurrencyRate(this.baseCurrency, ' ');
           this.initialLoad = false;
         })
