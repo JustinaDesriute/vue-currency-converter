@@ -55,6 +55,7 @@ import AmountInputField from './components/AmountInputField'
 import CurrencyRatioDisplay from './components/CurrencyRatioDisplay'
 
 import axios from 'axios';
+import debounce from 'debounce';
 
 export default {
   name: 'App',
@@ -90,6 +91,7 @@ export default {
   },
 
   methods: {
+
     setEnteredAmount(value) {
       if (value == undefined && this.initialLoad == true) {
         value = 100;
@@ -175,6 +177,7 @@ export default {
     },
 
     setComparisonFieldValues(value) {
+      debounce(this.swapConversionRates(value), 1000);
       this.swapConversionRates(value);
       this.toRatioFrom = '1' + this.baseCurrency + ' = ' + this.convertToCurrencyRate.toFixed(4) + ' ' + this.convertToCurrencyName;
     },
@@ -214,5 +217,6 @@ export default {
     this.setDateParameter();
     this.callExchangeRatesApi();
   },
+
 }
 </script>

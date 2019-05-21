@@ -14,7 +14,7 @@
             required
             value="123"
             onkeypress="return event.charCode >= 48"
-            @keyup="setAmount"
+            @input="setAmount"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -36,7 +36,8 @@
 
     methods: {
       setAmount(value) {
-        this.$emit('amountSet', value.srcElement.value);
+        console.log('value', value);
+        this.$emit('amountSet', value);
       }
     }
   }
