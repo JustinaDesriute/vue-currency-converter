@@ -5,11 +5,11 @@
             :value="toEqualsFrom"
             readonly
         ></v-text-field>
-        <v-text-field class="currency-list-item"
+        <!-- <v-text-field class="currency-list-item"
             color="#8c8c8c" 
             :value="fromEqualsTo"
             readonly
-        ></v-text-field>
+        ></v-text-field> -->
     </v-flex>
 </template>
 
@@ -22,7 +22,7 @@
       }
     },
     props: {
-      fromEqualsTo: String,
+      // fromEqualsTo: String,
       toEqualsFrom: String,
     },
   }

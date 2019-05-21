@@ -144,7 +144,7 @@ export default {
     convertCurrency() {
       // type check needed for initial conversion
       if (typeof(this.convertToCurrencyRate) == 'object' || this.convertToCurrencyRate == undefined) {
-        this.convertToCurrencyRate = 1.3006678416;
+        this.convertToCurrencyRate = 1.26983;
       }
       if (typeof(this.enteredAmount) == 'undefined') {
         this.enteredAmount = 100;
@@ -168,7 +168,9 @@ export default {
             }, {});
 
             this.swappedConversionRate = swappedCurrencyRate;
-            this.fromRatioTo = '1' + this.convertToCurrencyName + ' = ' + this.swappedConversionRate.toFixed(4) + ' ' + this.baseCurrency;
+            console.log('this.swappedConversionRate', this.swappedConversionRate);
+            // TODO: fix the swapped ratio display
+            // this.fromRatioTo = '1' + this.convertToCurrencyName + ' = ' + this.swappedConversionRate.toFixed(4) + ' ' + this.baseCurrency;
         })
         .catch(error => {
           console.log('error', error);
@@ -177,7 +179,6 @@ export default {
     },
 
     setComparisonFieldValues(value) {
-      debounce(this.swapConversionRates(value), 1000);
       this.swapConversionRates(value);
       this.toRatioFrom = '1' + this.baseCurrency + ' = ' + this.convertToCurrencyRate.toFixed(4) + ' ' + this.convertToCurrencyName;
     },
